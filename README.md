@@ -48,6 +48,7 @@
 
 
 ###根据回调的参数区分是源自哪类刷新操作
+**关闭上拉刷新动画与其他两类不同，是setUpRefreshing()**
 
 
     SuperSwipeRefreshLayout layout = (SuperSwipeRefreshLayout) findViewById(R.id.layout);
@@ -60,26 +61,26 @@
 
                         //TODO
 
-                        //业务执行完毕要关闭启动加载刷新动画
-                        //finish animation
+                        //业务执行完毕要关闭启动加载刷新动画  finish animation
                         layout.setRefreshing(false);
                         break;
+                        
                     case 1:  //type = 1：下拉刷新 pull down to refresh
 
                         //TODO
 
-                        //业务执行完毕要关闭下拉拉刷新动画
-                        //finish animation
+                        //业务执行完毕要关闭下拉拉刷新动画  finish animation
                         layout.setRefreshing(false);
                         break;
+                        
                     case 2: //type =2: 上拉刷新 pull up to refresh
 
                         //TODO
 
-                        //业务执行完毕要关闭上拉刷新动画
-                        //finish animation
+                        //业务执行完毕要关闭上拉刷新动画  finish animation
                         layout.setUpRefreshing(false);
                         break;
+                        
                     default:
                         break;
                 }
