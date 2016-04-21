@@ -18,7 +18,7 @@
     }
     
     dependencies {
-      compile 'com.yazhi:superswiperefreshlayout:1.0'
+      compile 'com.yazhi:superswiperefreshlayout:1.1.1'
     }
 
 ## 使用方法
