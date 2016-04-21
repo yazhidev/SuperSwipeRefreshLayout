@@ -1320,7 +1320,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     public interface OnRefreshListener {
         /**
          * type = 0 :刚进入界面时加载的操作，type = 1：下拉刷新的操作，type = 2：上拉刷新的操作
-         * type = 0 : refresh when created, type = 1 : pull down to refresh, type = 2 : pull up to refresh
+         * type = 0 : refresh when activity was created, type = 1 : pull down to refresh, type = 2 : pull up to refresh
          *
          * @param type
          */

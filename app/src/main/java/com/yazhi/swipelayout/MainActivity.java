@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //测试数据
-        //this is data for test
+        //data for test
         for (int i = 0; i < 15; i++) {
             list.add("Number  " + (i + 1) + ",  this is Test");
         }
@@ -54,23 +54,23 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         switch (type) {
-                            case 0: //进入界面时加载的操作 refresh when created
-                                list.add(0, "Refresh when created");
+                            case 0: //进入界面时加载的操作 refresh when activity was created
+                                list.add(0, "Refresh when activity was created");
                                 //关闭启动加载刷新动画
                                 //finish animation
                                 mView.setRefreshing(false);
                                 break;
                             case 1: //下拉刷新 pull down to refresh
-                                list.add(0, "Pull to refresh");
+                                list.add(0, "Pull down to refresh");
                                 //关闭下拉拉刷新动画
                                 //finish animation
                                 mView.setRefreshing(false);
                                 break;
                             case 2: //上拉刷新 pull up to refresh
-                                list.add("Up to refresh, number 1");
-                                list.add("Up to refresh, number 2");
-                                list.add("Up to refresh, number 3");
-                                list.add("Up to refresh, number 4");
+                                list.add("pull up to refresh, number 1");
+                                list.add("pull up to refresh, number 2");
+                                list.add("pull up to refresh, number 3");
+                                list.add("pull up to refresh, number 4");
                                 //关闭上拉刷新动画
                                 //finish animation
                                 mView.setUpRefreshing(false);
