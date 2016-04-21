@@ -48,7 +48,7 @@
 
 
 ###根据回调的参数区分是源自哪类刷新操作
-**关闭上拉刷新动画与其他两类不同，是setUpRefreshing()**
+**关闭上拉刷新动画与其他两类不同，是setUpRefreshing(false)**
 
 
     SuperSwipeRefreshLayout layout = (SuperSwipeRefreshLayout) findViewById(R.id.layout);
