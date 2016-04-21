@@ -9,7 +9,7 @@
 
 ## 使用Gradle构建
 
-在 **Moudle:你的项目** 的build.gradle里添加
+在你moudle项目的build.gradle**(Moudle:你的项目)**里添加(注意:不是project的build.gradle)
 
     repositories {
       maven {
@@ -18,7 +18,7 @@
     }
     
     dependencies {
-      compile 'com.yazhi:superswiperefreshlayout:1.1.1'
+      compile 'com.yazhi:superswiperefreshlayout:1.1.1
     }
 
 ## 使用方法
@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:AllowUpToRefresh="true"         // 是否允许上拉刷新
-        app:BottomLocationPercent="0.88"    // 底部刷新动画的位置（控件高度的百分比）
+        app:BottomLocationPercent="0.88"    // 底部刷新动画的位置（控件高度的百分比，当填写的数值大于1时默认为0.88）
         app:RefreshWhenCreate="true"        // 是否一进入布局时就加载刷新
         >
 
