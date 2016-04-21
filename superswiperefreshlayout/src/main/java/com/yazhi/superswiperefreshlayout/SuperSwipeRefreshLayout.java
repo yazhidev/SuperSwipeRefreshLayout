@@ -43,7 +43,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     private int mLoadDistance = 300; //上拉刷新的最小触发距离
     boolean isUp = false;
     int UpRefreshingDistance; //上拉刷新的位置
-    int RefreshingLocation; //初始的刷新位置
     boolean refreshWhenCreate; //是否允许进入布局时就刷新
     boolean allowUpTorefresh;
     float mOldSpinnerFinalOffset;
@@ -73,7 +72,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SuperSwipeRefreshLayout);
         refreshWhenCreate = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_RefreshWhenCreate, false); //是否在进入布局时就刷新，默认不允许
         allowUpTorefresh = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_AllowUpToRefresh, false); //是要允许上拉刷新，默认不允许
-        RefreshingLocation = typedArray.getInteger(R.styleable.SuperSwipeRefreshLayout_ProgressViewOffset, 48);
         mAFloat = typedArray.getFloat(R.styleable.SuperSwipeRefreshLayout_BottomLocationPercent, 0.88f);
         typedArray.recycle();
 
@@ -526,8 +524,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
             }
 //            setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop,
 //                    true /* requires update */);
-            //下拉刷新的位置
-            setTargetOffsetTopAndBottom(RefreshingLocation,
+            setTargetOffsetTopAndBottom((int) mSpinnerFinalOffset,
                     true /* requires update */);
             mNotify = false;
             startScaleUpAnimation(mRefreshListener);

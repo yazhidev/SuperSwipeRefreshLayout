@@ -1,6 +1,5 @@
 package com.yazhi.swipelayout;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -35,18 +34,17 @@ public class MainActivity extends AppCompatActivity {
         //测试数据
         //data for test
         for (int i = 0; i < 15; i++) {
-            list.add("Number  " + (i + 1) + ",  this is Test");
+            list.add("Number  " + (i + 1) + ",  test data");
         }
         mView = (SuperSwipeRefreshLayout) findViewById(R.id.myview);
         mLv = (ListView) findViewById(R.id.listview);
         final Adapter adapter = new Adapter();
         mLv.setAdapter(adapter);
 
-        //设置（下拉刷新）小圆圈的位置（刚进入界面时的刷新位置请在xml布局中设置）
+        //设置加载动画的位置
         mView.setProgressViewOffset(false, 0, 48);
         //设置小圆圈颜色
-        mView.setColorSchemeColors(Color.BLUE);
-
+        mView.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
         mView.setOnRefreshListener(new SuperSwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh(final int type) {
@@ -67,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
                                 mView.setRefreshing(false);
                                 break;
                             case 2: //上拉刷新 pull up to refresh
-                                list.add("pull up to refresh, number 1");
-                                list.add("pull up to refresh, number 2");
-                                list.add("pull up to refresh, number 3");
-                                list.add("pull up to refresh, number 4");
+                                list.add("Pull up to refresh, number 1");
+                                list.add("Pull up to refresh, number 2");
+                                list.add("Pull up to refresh, number 3");
+                                list.add("Pull up to refresh, number 4");
                                 //关闭上拉刷新动画
                                 //finish animation
                                 mView.setUpRefreshing(false);
@@ -112,4 +110,5 @@ public class MainActivity extends AppCompatActivity {
             return inflate;
         }
     }
+
 }

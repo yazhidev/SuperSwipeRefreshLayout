@@ -17,7 +17,6 @@
         android:layout_height="match_parent"
         app:AllowUpToRefresh="true"
         app:BottomLocationPercent="0.88"
-        app:ProgressViewOffset="48"
         app:RefreshWhenCreate="true"
         >
 

@@ -4,7 +4,6 @@
         <attr name="RefreshWhenCreate" format="boolean"/> //是否在刚进入布局时就刷新
         <attr name="AllowUpToRefresh" format="boolean"/> //是否允许上拉刷新
         <attr name="BottomLocationPercent" format="float"/> //底部刷新动画的位置
-        <attr name="ProgressViewOffset" format="integer"/> //启动加载时刷新动画的位置
 
     </declare-styleable>
 </resources>
