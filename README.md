@@ -10,12 +10,6 @@
 ## 使用Gradle构建
 
 在你moudle项目的build.gradle**(Moudle:你的项目)**里添加(注意:不是project的build.gradle)
-
-    repositories {
-      maven {
-         url 'https://dl.bintray.com/yazhi1992/maven/'
-      }
-    }
     
     dependencies {
       compile 'com.yazhi:superswiperefreshlayout:1.1.1
