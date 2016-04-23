@@ -20,7 +20,8 @@
 ###XML布局中
  
   **如果使用自定义属性请记住要加上xmlns:app="http://schemas.android.com/apk/res-auto"**
-  suswiperefreshlayout布局内只能有一个直接子View，这个子view要求必须是可以滑动的，例如scrollview，listview，recyclerview，如果子view直接放relativelayout等不能滑动的控件时上拉刷新会出现问题。
+  
+  SuperSwipeRefreshLayout布局内只能有一个直接子View，这个子view要求必须是可以滑动的，例如scrollview，listview，recyclerview，如果子view直接放relativelayout等不能滑动的控件时上拉刷新会出现问题。
 
     
     <com.yazhi.superswiperefreshlayout.SuperSwipeRefreshLayout
