@@ -20,6 +20,7 @@
 ###XML布局中
  
   **如果使用自定义属性请记住要加上xmlns:app="http://schemas.android.com/apk/res-auto"**
+  suswiperefreshlayout布局内只能有一个直接子View，这个子view要求必须是可以滑动的，例如scrollview，listview，recyclerview，如果子view直接放relativelayout等不能滑动的控件时上拉刷新会出现问题。
 
     
     <com.yazhi.superswiperefreshlayout.SuperSwipeRefreshLayout
@@ -87,6 +88,9 @@
         layout.setProgressViewOffset(false, 0, 48);
         //设置加载动画的颜色，最多可设置四种
         layout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
+
+因为这个控件是基于官方swiperefreshlayout改动的，所以除了新增的功能和属性、方法，其他与原版一致，更多具体的使用方法请参考
+[SwipeRefreshLayout官方文档](http://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.html)。
 
 
 ##最后
