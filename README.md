@@ -12,7 +12,7 @@
 在你moudle项目的build.gradle**(Moudle:你的项目)**里添加(注意:不是project的build.gradle)
     
     dependencies {
-      compile 'com.yazhi:superswiperefreshlayout:1.1.1
+      compile 'com.yazhi:superswiperefreshlayout:1.1.2
     }
 
 ## 使用方法
