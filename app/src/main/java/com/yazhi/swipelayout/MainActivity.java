@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         mLv.setAdapter(adapter);
 
         //设置加载动画的位置
-        mView.setProgressViewOffset(false, 0, 48);
+//        mView.setProgressViewOffset(false, 100, 198);
+//        mView.setProgressViewEndTarget(false, 198);
         //设置小圆圈颜色
         mView.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
         mView.setOnRefreshListener(new SuperSwipeRefreshLayout.OnRefreshListener() {

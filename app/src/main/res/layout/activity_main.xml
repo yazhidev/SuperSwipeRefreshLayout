@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:AllowUpToRefresh="true"
-        app:BottomLocationPercent="0.88"
+        app:BottomLocationPercent="1.5"
         app:RefreshWhenCreate="true"
         >
 

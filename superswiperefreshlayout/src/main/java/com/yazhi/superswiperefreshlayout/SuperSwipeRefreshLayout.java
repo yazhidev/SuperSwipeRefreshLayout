@@ -46,187 +46,11 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     boolean refreshWhenCreate; //是否允许进入布局时就刷新
     boolean allowUpTorefresh;
     float mOldSpinnerFinalOffset;
+    boolean mOldmUsingCustomStart;
     private View mListViewFooter; //底部加载时的布局
     private int mMeasuredHeight;
     private float mAFloat;
     boolean childIsListview = false;
-
-    /**
-     * Simple constructor to use when creating a SwipeRefreshLayout from code.
-     *
-     * @param context
-     */
-    public SuperSwipeRefreshLayout(Context context) {
-        this(context, null);
-        mContext = context;
-    }
-
-    /**
-     * Constructor that is called when inflating SwipeRefreshLayout from XML.
-     *
-     * @param context
-     * @param attrs
-     */
-    public SuperSwipeRefreshLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SuperSwipeRefreshLayout);
-        refreshWhenCreate = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_RefreshWhenCreate, false); //是否在进入布局时就刷新，默认不允许
-        allowUpTorefresh = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_AllowUpToRefresh, false); //是要允许上拉刷新，默认不允许
-        mAFloat = typedArray.getFloat(R.styleable.SuperSwipeRefreshLayout_BottomLocationPercent, 0.88f);
-        typedArray.recycle();
-
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
-        mMediumAnimationDuration = getResources().getInteger(
-                android.R.integer.config_mediumAnimTime);
-
-        setWillNotDraw(false);
-        mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
-
-        final TypedArray a = context.obtainStyledAttributes(attrs, LAYOUT_ATTRS);
-        setEnabled(a.getBoolean(0, true));
-        a.recycle();
-
-        final DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (CIRCLE_DIAMETER * metrics.density);
-        mCircleHeight = (int) (CIRCLE_DIAMETER * metrics.density);
-
-        createProgressView();
-        ViewCompat.setChildrenDrawingOrderEnabled(this, true);
-        // the absolute offset has to take into account that the circle starts at an offset
-        mSpinnerFinalOffset = DEFAULT_CIRCLE_TARGET * metrics.density;
-        mTotalDragDistance = mSpinnerFinalOffset;
-        mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
-
-        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
-        setNestedScrollingEnabled(true);
-
-        mContext = context;
-
-        mListViewFooter = LayoutInflater.from(context).inflate(R.layout.item_null, null);
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: //按下操作
-                if (!isRefreshing() && allowUpTorefresh && isBottom()) {
-                    mYPress = (int) ev.getRawY();
-                    setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop(), true);
-                    mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-                    mIsBeingDragged = false;
-                    final float initialDownY = getMotionEventY(ev, mActivePointerId);
-                    if (initialDownY == -1) {
-                        return false;
-                    }
-                    mInitialDownY = initialDownY;
-                }
-                break;
-            case MotionEvent.ACTION_MOVE: //松手时的Y坐标
-                if (allowUpTorefresh && isBottom()) {
-                    mYRelease = (int) ev.getRawY();
-                }
-                break;
-            case MotionEvent.ACTION_UP: //松手
-                if (canLoad() && !isRefreshing() && allowUpTorefresh && isBottom()) {
-                    setUpRefreshing(true); //显示加载动画
-                }
-                break;
-            default:
-                break;
-        }
-        return super.dispatchTouchEvent(ev);
-    }
-
-    public void setUpRefreshing(boolean loading) {
-        if (allowUpTorefresh) {
-            isLoading = loading;
-            isUp = loading;
-            if (isLoading) {
-
-                if (childIsListview) {
-                    mListView.addFooterView(mListViewFooter);
-                    mListView.smoothScrollBy(100, 500);
-                }
-                mOriginalOffsetTop = UpRefreshingDistance;
-
-                mCircleView.setVisibility(View.VISIBLE);
-                ViewCompat.setScaleX(mCircleView, 1f); //1f1倍，2f2倍大小
-                ViewCompat.setScaleY(mCircleView, 1f);
-
-                mNotify = true;
-                ensureTarget();
-                mRefreshing = true;
-                mOldSpinnerFinalOffset = mSpinnerFinalOffset;
-                mSpinnerFinalOffset = UpRefreshingDistance;
-                mFrom = UpRefreshingDistance; //从该位置移动到转圈处（mCurrentTargetOffsetTop）
-                mAnimateToCorrectPosition.reset();
-                mAnimateToCorrectPosition.setDuration(ANIMATE_TO_TRIGGER_DURATION);
-                mAnimateToCorrectPosition.setInterpolator(mDecelerateInterpolator);
-                mCircleView.setAnimationListener(mRefreshListener);
-                mCircleView.clearAnimation();
-                mCircleView.startAnimation(mAnimateToCorrectPosition);
-            } else {
-                mYRelease = 0;
-                mYPress = 0;
-
-                //还原设置，否则上拉位置会错乱
-                mOriginalOffsetTop = -mCircleView.getMeasuredHeight();
-                mCurrentTargetOffsetTop = mCircleView.getTop();
-                mSpinnerFinalOffset = mOldSpinnerFinalOffset;
-                setRefreshing(false);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && childIsListview) {
-                    mListView.removeFooterView(mListViewFooter);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (canLoad()) {
-            if (allowUpTorefresh) {
-                setUpRefreshing(true); //显示加载动画
-            }
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-    }
-
-    //判断是否加载
-    private boolean canLoad() {
-        return isBottom() && !isLoading && isPullUp();
-    }
-
-    //判断是否到达了底部
-    private boolean isBottom() {
-        if (mListView == null) {
-            int childs = getChildCount();
-            if (childs > 0) {
-                View childView = getChildAt(0);
-                if (childView instanceof ListView) {
-                    childIsListview = true;
-                    mListView = (ListView) childView;
-                    //添加空白布局，让用户知道下面还有列表
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        mListView.addFooterView(mListViewFooter);
-                        mListView.removeFooterView(mListViewFooter);
-                    }
-                    mListView.setOnScrollListener(this);
-                }
-            }
-        }
-        if (childIsListview && mListView != null && mListView.getAdapter() != null) {
-            //可见的最后一个列表是否是最后一个listview的列表
-            return mListView.getLastVisiblePosition() == (mListView.getAdapter().getCount() - 1);
-        }
-        return false;
-    }
 
     //判断是否是上拉操作
     private boolean isPullUp() {
@@ -286,11 +110,11 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     private boolean mNestedScrollInProgress;
 
     private int mMediumAnimationDuration;
-    private int mCurrentTargetOffsetTop;
+    private int mCurrentTargetOffsetTop; //-70
     // Whether or not the starting offset has been determined.
     private boolean mOriginalOffsetCalculated = false;
 
-    private float mInitialMotionY;
+    private float mInitialMotionY; //下拉的初始Y坐标
     private float mInitialDownY;
     private boolean mIsBeingDragged;
     private int mActivePointerId = INVALID_POINTER;
@@ -312,7 +136,9 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
 
     private float mStartingScale;
 
-    protected int mOriginalOffsetTop;
+    protected int mOriginalOffsetTop; //下拉时圆出现的初始位置
+
+    private float mSpinnerFinalOffset; //下拉刷新的位置,这两个的差就是可以滑动的距离
 
     private MaterialProgressDrawable mProgress;
 
@@ -326,8 +152,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
 
     private Animation mScaleDownToStartAnimation;
 
-    private float mSpinnerFinalOffset;
-
     private boolean mNotify;
 
     private int mCircleWidth;
@@ -335,7 +159,194 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     private int mCircleHeight;
 
     // Whether the client has set a custom starting position;
-    private boolean mUsingCustomStart;
+    private boolean mUsingCustomStart; //设置了位置，为true
+
+    /**
+     * Simple constructor to use when creating a SwipeRefreshLayout from code.
+     *
+     * @param context
+     */
+    public SuperSwipeRefreshLayout(Context context) {
+        this(context, null);
+        mContext = context;
+    }
+
+    /**
+     * Constructor that is called when inflating SwipeRefreshLayout from XML.
+     *
+     * @param context
+     * @param attrs
+     */
+    public SuperSwipeRefreshLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SuperSwipeRefreshLayout);
+        refreshWhenCreate = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_RefreshWhenCreate, false); //是否在进入布局时就刷新，默认不允许
+        allowUpTorefresh = typedArray.getBoolean(R.styleable.SuperSwipeRefreshLayout_AllowUpToRefresh, false); //是要允许上拉刷新，默认不允许
+        mAFloat = typedArray.getFloat(R.styleable.SuperSwipeRefreshLayout_BottomLocationPercent, 0.88f);
+        if (mAFloat > 1) {
+            mAFloat = 0.88f;
+        }
+        typedArray.recycle();
+
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+
+        mMediumAnimationDuration = getResources().getInteger(
+                android.R.integer.config_mediumAnimTime);
+
+        setWillNotDraw(false);
+        mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs, LAYOUT_ATTRS);
+        setEnabled(a.getBoolean(0, true));
+        a.recycle();
+
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mCircleWidth = (int) (CIRCLE_DIAMETER * metrics.density);
+        mCircleHeight = (int) (CIRCLE_DIAMETER * metrics.density);
+
+        createProgressView();
+        ViewCompat.setChildrenDrawingOrderEnabled(this, true);
+        // the absolute offset has to take into account that the circle starts at an offset
+        mSpinnerFinalOffset = DEFAULT_CIRCLE_TARGET * metrics.density;
+        mTotalDragDistance = mSpinnerFinalOffset;
+        mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
+
+        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
+        setNestedScrollingEnabled(true);
+
+        mContext = context;
+
+        mListViewFooter = LayoutInflater.from(context).inflate(R.layout.item_null, null);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        switch (action) {
+            // TODO: 2016/4/26 0026 dispatchTouch
+            case MotionEvent.ACTION_DOWN: //按下操作
+                if (!isRefreshing() && allowUpTorefresh && isBottom()) {
+                    mYPress = (int) ev.getRawY();
+//                    setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop(), true);
+//                    Log.e("==", "mOriginalOffsetTop" +mOriginalOffsetTop+ "mCircleView.getTop()" + mCircleView.getTop() );
+//                    mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+//                    mIsBeingDragged = false;
+//                    final float initialDownY = getMotionEventY(ev, mActivePointerId);
+//                    if (initialDownY == -1) {
+//                        return false;
+//                    }
+//                    mInitialDownY = initialDownY;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE: //松手时的Y坐标
+                if (allowUpTorefresh && isBottom()) {
+                    mYRelease = (int) ev.getRawY();
+                }
+                break;
+            case MotionEvent.ACTION_UP: //松手
+                if (canLoad() && !isRefreshing() && allowUpTorefresh && isBottom()) {
+                    setUpRefreshing(true); //显示加载动画
+                }
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    public void setUpRefreshing(boolean loading) {
+        if (allowUpTorefresh) {
+            isLoading = loading;
+            isUp = loading;
+            if (isLoading) {
+
+                if (childIsListview) {
+                    mListView.addFooterView(mListViewFooter);
+                    mListView.smoothScrollBy(100, 500);
+                }
+                // TODO: 2016/4/26 0026 setUpRefreshing
+                mOldmUsingCustomStart = mUsingCustomStart;
+                mUsingCustomStart = true;
+
+                mOriginalOffsetTop = UpRefreshingDistance;
+
+                mCircleView.setVisibility(View.VISIBLE);
+                ViewCompat.setScaleX(mCircleView, 1f); //1f1倍，2f2倍大小
+                ViewCompat.setScaleY(mCircleView, 1f);
+
+                mNotify = true;
+                ensureTarget();
+                mRefreshing = true;
+                mOldSpinnerFinalOffset = mSpinnerFinalOffset;
+                mSpinnerFinalOffset = UpRefreshingDistance;
+                mFrom = UpRefreshingDistance; //从该位置移动到转圈处（mCurrentTargetOffsetTop）
+                mAnimateToCorrectPosition.reset();
+                mAnimateToCorrectPosition.setDuration(ANIMATE_TO_TRIGGER_DURATION);
+                mAnimateToCorrectPosition.setInterpolator(mDecelerateInterpolator);
+                mCircleView.setAnimationListener(mRefreshListener);
+                mCircleView.clearAnimation();
+                mCircleView.startAnimation(mAnimateToCorrectPosition);
+            } else {
+                mYRelease = 0;
+                mYPress = 0;
+                //还原设置，否则上拉位置会错乱
+                mOriginalOffsetTop = -mCircleView.getMeasuredHeight();
+                mCurrentTargetOffsetTop = mCircleView.getTop();
+                mSpinnerFinalOffset = mOldSpinnerFinalOffset;
+                mUsingCustomStart = mOldmUsingCustomStart;
+                setRefreshing(false);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && childIsListview) {
+                    mListView.removeFooterView(mListViewFooter);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (canLoad()) {
+            if (allowUpTorefresh) {
+                setUpRefreshing(true); //显示加载动画
+            }
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+    }
+
+    //判断是否加载
+    private boolean canLoad() {
+        return isBottom() && !isLoading && isPullUp();
+    }
+
+    //判断是否到达了底部
+    private boolean isBottom() {
+        if (mListView == null) {
+            int childs = getChildCount();
+            if (childs > 0) {
+                View childView = getChildAt(0);
+                if (childView instanceof ListView) {
+                    childIsListview = true;
+                    mListView = (ListView) childView;
+                    //添加空白布局，让用户知道下面还有列表
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        mListView.addFooterView(mListViewFooter);
+                        mListView.removeFooterView(mListViewFooter);
+                    }
+                    mListView.setOnScrollListener(this);
+                }
+            }
+        }
+        if (childIsListview && mListView != null && mListView.getAdapter() != null) {
+            //可见的最后一个列表是否是最后一个listview的列表
+            return mListView.getLastVisiblePosition() == (mListView.getAdapter().getCount() - 1);
+        }
+        return false;
+    }
+
 
     private Animation.AnimationListener mRefreshListener = new Animation.AnimationListener() {
         @Override
@@ -522,10 +533,11 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
             } else {
                 endTarget = (int) mSpinnerFinalOffset;
             }
-//            setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop,
-//                    true /* requires update */);
-            setTargetOffsetTopAndBottom((int) mSpinnerFinalOffset,
+            setTargetOffsetTopAndBottom(endTarget,
                     true /* requires update */);
+
+//            setTargetOffsetTopAndBottom((int) mSpinnerFinalOffset + mOriginalOffsetTop,
+//                    true /* requires update */);
             mNotify = false;
             startScaleUpAnimation(mRefreshListener);
         } else {
@@ -778,6 +790,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
             }
         }
 
+        //一进入页面就自动刷新
         if (refreshWhenCreate) {
             setRefreshing(true);
             refreshWhenCreate = false;
@@ -842,7 +855,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                 mInitialDownY = initialDownY;
                 break;
 
-            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_MOVE: //拦截手势，如果return true会执行onTouchEvent
                 if (mActivePointerId == INVALID_POINTER) {
                     Log.e(LOG_TAG, "Got ACTION_MOVE event but don't have an active pointer id.");
                     return false;
@@ -857,6 +870,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                     mInitialMotionY = mInitialDownY + mTouchSlop;
                     mIsBeingDragged = true;
                     mProgress.setAlpha(STARTING_PROGRESS_ALPHA);
+//                    Log.e("==", "mTouchSlop" + mTouchSlop +"mInitialDownY"+mInitialDownY+"mTouchSlop"+mTouchSlop);
                 }
                 break;
 
@@ -1049,7 +1063,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
         return animation != null && animation.hasStarted() && !animation.hasEnded();
     }
 
-    private void moveSpinner(float overscrollTop) {
+    private void moveSpinner(float overscrollTop) { //移动转盘
         mProgress.showArrow(true);
         float originalDragPercent = overscrollTop / mTotalDragDistance;
         float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
@@ -1075,6 +1089,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
         if (mScale) {
             setAnimationProgress(Math.min(1f, overscrollTop / mTotalDragDistance));
         }
+        Log.e("==", "mTotalDragDistance" + mTotalDragDistance);
         if (overscrollTop < mTotalDragDistance) {
             if (mProgress.getAlpha() > STARTING_PROGRESS_ALPHA
                     && !isAnimationRunning(mAlphaStartAnimation)) {
@@ -1157,6 +1172,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
+                Log.e("==", "y--" + y + "mInitialMotionY--" + mInitialMotionY);
                 final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
                 if (mIsBeingDragged) {
                     if (overscrollTop > 0) {
@@ -1180,7 +1196,7 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
             case MotionEventCompat.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
                 break;
-
+// TODO: 2016/4/26 0026 onTouchEvent 
             case MotionEvent.ACTION_UP: {
                 pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
                 if (pointerIndex < 0) {
