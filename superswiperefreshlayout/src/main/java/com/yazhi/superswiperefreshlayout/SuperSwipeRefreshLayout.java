@@ -57,8 +57,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
         return (mYPress - mYRelease) >= mLoadDistance;
     }
 
-    //源码
-
     // Maps to ProgressBar.Large style
     public static final int LARGE = MaterialProgressDrawable.LARGE;
     // Maps to ProgressBar default style
@@ -223,19 +221,9 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
     public boolean dispatchTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         switch (action) {
-            // TODO: 2016/4/26 0026 dispatchTouch
             case MotionEvent.ACTION_DOWN: //按下操作
                 if (!isRefreshing() && allowUpTorefresh && isBottom()) {
                     mYPress = (int) ev.getRawY();
-//                    setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop(), true);
-//                    Log.e("==", "mOriginalOffsetTop" +mOriginalOffsetTop+ "mCircleView.getTop()" + mCircleView.getTop() );
-//                    mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-//                    mIsBeingDragged = false;
-//                    final float initialDownY = getMotionEventY(ev, mActivePointerId);
-//                    if (initialDownY == -1) {
-//                        return false;
-//                    }
-//                    mInitialDownY = initialDownY;
                 }
                 break;
             case MotionEvent.ACTION_MOVE: //松手时的Y坐标
@@ -264,7 +252,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                     mListView.addFooterView(mListViewFooter);
                     mListView.smoothScrollBy(100, 500);
                 }
-                // TODO: 2016/4/26 0026 setUpRefreshing
                 mOldmUsingCustomStart = mUsingCustomStart;
                 mUsingCustomStart = true;
 
@@ -870,7 +857,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                     mInitialMotionY = mInitialDownY + mTouchSlop;
                     mIsBeingDragged = true;
                     mProgress.setAlpha(STARTING_PROGRESS_ALPHA);
-//                    Log.e("==", "mTouchSlop" + mTouchSlop +"mInitialDownY"+mInitialDownY+"mTouchSlop"+mTouchSlop);
                 }
                 break;
 
@@ -1089,7 +1075,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
         if (mScale) {
             setAnimationProgress(Math.min(1f, overscrollTop / mTotalDragDistance));
         }
-        Log.e("==", "mTotalDragDistance" + mTotalDragDistance);
         if (overscrollTop < mTotalDragDistance) {
             if (mProgress.getAlpha() > STARTING_PROGRESS_ALPHA
                     && !isAnimationRunning(mAlphaStartAnimation)) {
@@ -1172,7 +1157,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                Log.e("==", "y--" + y + "mInitialMotionY--" + mInitialMotionY);
                 final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
                 if (mIsBeingDragged) {
                     if (overscrollTop > 0) {
@@ -1196,7 +1180,6 @@ public class SuperSwipeRefreshLayout extends ViewGroup implements NestedScrollin
             case MotionEventCompat.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
                 break;
-// TODO: 2016/4/26 0026 onTouchEvent 
             case MotionEvent.ACTION_UP: {
                 pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
                 if (pointerIndex < 0) {
